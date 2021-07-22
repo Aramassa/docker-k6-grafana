@@ -25,18 +25,6 @@ services:
     volumes:
       - ./scripts:/scripts
       - ./var/victoriametrics:/storage
-  victom:
-    image: victoriametrics/victoria-metrics:latest
-    networks:
-      - k6
-      - grafana
-    # ports:
-    #   - "8428:8428"
-    command:
-      - --storageDataPath=/storage
-      - --graphiteListenAddr=:2003
-      - --opentsdbListenAddr=:4242
-      - --httpListenAddr=:8428
   grafana:
     image: grafana/grafana:latest
     networks:
