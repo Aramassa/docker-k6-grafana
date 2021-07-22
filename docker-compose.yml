@@ -18,7 +18,6 @@ services:
     restart: always
     depends_on:
       - web
-      - victom
       - influxdb
     environment:
       - K6_OUT=influxdb=http://influxdb:8086/k6
