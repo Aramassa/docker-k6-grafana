@@ -1,0 +1,53 @@
+version: "3.8"
+
+networks:
+  k6:
+  grafana:
+
+services:
+  k6:
+    image: loadimpact/k6:latest
+    networks:
+      - k6
+    ports:
+      - "6565:6565"
+    environment:
+      - K6_OUT=influxdb=http://influxdb:8086/k6
+    volumes:
+      - ./scripts:/scripts
+      - ./var/victoriametrics:/storage
+  victom:
+    image: victoriametrics/victoria-metrics:latest
+    networks:
+      - k6
+      - grafana
+    ports:
+      - "8428:8428"
+    command:
+      - --storageDataPath=/storage
+      - --graphiteListenAddr=:2003
+      - --opentsdbListenAddr=:4242
+      - --httpListenAddr=:8428
+  grafana:
+    image: grafana/grafana:latest
+    networks:
+      - grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_BASIC_ENABLED=false
+    volumes:
+      - ./dashboards:/var/lib/grafana/dashboards
+      # - ./grafana-dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
+      # - ./grafana-datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+  web:
+    image: nginx
+    volumes:
+      - ./templates:/etc/nginx/templates
+    ports:
+      - "8080:80"
+    environment:
+      - NGINX_HOST=foobar.com
+      - NGINX_PORT=80
