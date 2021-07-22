@@ -3,6 +3,7 @@ import { Rate, Counter, Gauge, Trend } from 'k6/metrics';
 import { check, sleep } from "k6";
 
 export let options = {
+  discardResponseBodies: true,
   vus: 100,
   duration: String(10 + Math.random() * 10 ) + 's',
   rps: 20
