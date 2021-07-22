@@ -7,13 +7,19 @@ networks:
 services:
   k6:
     image: loadimpact/k6:latest
+    env_file: .env
     networks:
       - k6
-    ports:
-      - "6565:6565"
+    deploy:
+      replicas: 2
     command:
       - run
-      - /scripts/test.js
+      - /scripts/${K6_LOAD_DIR}/k6.js
+    restart: always
+    depends_on:
+      - web
+      - victom
+      - influxdb
     environment:
       - K6_OUT=influxdb=http://influxdb:8086/k6
     volumes:
@@ -24,8 +30,8 @@ services:
     networks:
       - k6
       - grafana
-    ports:
-      - "8428:8428"
+    # ports:
+    #   - "8428:8428"
     command:
       - --storageDataPath=/storage
       - --graphiteListenAddr=:2003
@@ -43,16 +49,25 @@ services:
       - GF_AUTH_BASIC_ENABLED=false
     volumes:
       - ./dashboards:/var/lib/grafana/dashboards
-      # - ./grafana-dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
-      # - ./grafana-datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+      - ./grafana-dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
+      - ./grafana-datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+  influxdb:
+    image: influxdb:1.8
+    networks:
+      - k6
+      - grafana
+    # ports:
+    #   - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
   web:
     image: nginx
     networks:
       - k6
     volumes:
       - ./templates:/etc/nginx/templates
-    ports:
-      - "8080:80"
+    # ports:
+    #   - "8080:80"
     environment:
       - NGINX_HOST=foobar.com
       - NGINX_PORT=80
