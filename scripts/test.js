@@ -15,7 +15,8 @@ export let options = {
 };
 
 export default function () {
-  const response = http.get("http://web/", {headers: {Accepts: "application/json"}});
+  console.log('hello!!');
+  const response = http.get("http://web/", {headers: {Accepts: "text/html"}});
   check(response, { "status is 200": (r) => r.status === 200 });
   sleep(.300);
 };

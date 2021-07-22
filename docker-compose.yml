@@ -11,6 +11,9 @@ services:
       - k6
     ports:
       - "6565:6565"
+    command:
+      - run
+      - /scripts/test.js
     environment:
       - K6_OUT=influxdb=http://influxdb:8086/k6
     volumes:
@@ -44,6 +47,8 @@ services:
       # - ./grafana-datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
   web:
     image: nginx
+    networks:
+      - k6
     volumes:
       - ./templates:/etc/nginx/templates
     ports:
